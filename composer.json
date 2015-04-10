@@ -1,0 +1,32 @@
+{
+  "name" : "coolms/jquery",
+  "description" : "CoolMS2 JQuery Module",
+  "version" : "0.1.0",
+  "type" : "library",
+  "keywords" : ["zf2", "coolms", "coolms2", "jquery"],
+  "homepage" : "https://github.com/coolms/jquery",
+  "license" : "BSD-3-Clause",
+  "authors" : [ {
+    "name" : "Dmitry Popov",
+    "email" : "d.popov@altgraphic.com",
+    "role" : "Developer"
+  } ],
+  "require" : {
+    "php" : ">=5.4.0",
+    "rwoverdijk/assetmanager" : ">=1.4.4"
+  },
+  "require-dev" : {
+    "phpunit/phpunit" : "~4.5"
+  },
+  "autoload" : {
+    "psr-4" : { "CmsJquery\\" : "src/" }
+  },
+  "autoload-dev" : {
+    "psr-4" : { "CmsJqueryTest\\" : "tests/" }
+  },
+  "extra" : {
+    "branch-alias" : {
+      "dev-master" : "0.1.x-dev"
+    }
+  }
+}
