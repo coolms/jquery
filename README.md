@@ -1,1 +1,1 @@
-# CoolMS2 JQuery Module
+# CoolMS2 jQuery Module
