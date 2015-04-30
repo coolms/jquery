@@ -3,7 +3,7 @@
   "description" : "CoolMS2 JQuery Module",
   "version" : "0.1.0",
   "type" : "library",
-  "keywords" : ["zf2", "coolms", "coolms2", "jquery"],
+  "keywords" : [ "zf2", "coolms", "coolms2", "cmsjquery" ],
   "homepage" : "https://github.com/coolms/jquery",
   "license" : "BSD-3-Clause",
   "authors" : [ {
