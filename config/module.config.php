@@ -1,8 +1,8 @@
 <?php
 /**
- * CoolMS2 Jquery module (http://www.coolms.com/)
- * 
- * @link      http://github.com/coolms/CmsJquery for the canonical source repository
+ * CoolMS2 jQuery Module (http://www.coolms.com/)
+ *
+ * @link      http://github.com/coolms/jquery for the canonical source repository
  * @copyright Copyright (c) 2006-2015 Altgraphic, ALC (http://www.altgraphic.com)
  * @license   http://www.coolms.com/license/new-bsd New BSD License
  * @author    Dmitry Popov <d.popov@altgraphic.com>
@@ -18,9 +18,49 @@ return [
             ],
         ],
     ],
+    'cmsjquery' => [
+        'plugins' => [
+            'ui' => ['onLoad' => true],
+            'placeholder' => [
+                'path' => 'jquery.placeholder.min.js',
+                'element' => 'input,textarea',
+                'onLoad' => true,
+            ],
+            'cookie' => [
+                'path' => 'jquery.cookie.min.js',
+                'onLoad' => true,
+            ],
+            'nicescroll' => [
+                'path' => 'nicescroll/jquery.nicescroll.min.js',
+                'onLoad' => true,
+            ],
+            'verticalaligncenter' => [
+                'path' => 'jquery.verticalaligncenter.js',
+                'name' => 'verticalAlignCenter',
+                'element' => '.verticalcenter',
+                'onLoad' => true,
+            ],
+            'maphilight' => [],
+        ],
+    ],
     'controllers' => [
         'invokables' => [
-            'CmsJquery\Controller\Admin' => 'CmsJquery\Controller\AdminController',
+            'CmsJquery\Controller\Admin' => 'CmsJquery\Mvc\Controller\AdminController',
+        ],
+    ],
+    'jquery_plugins' => [
+        'abstract_factories' => [
+            'CmsJquery\Plugin\JQueryPluginAbstractServiceFactory'
+                => 'CmsJquery\Plugin\JQueryPluginAbstractServiceFactory',
+        ],
+        'aliases' => [
+            'ui' => 'CmsJquery\View\Helper\Plugins\Ui',
+        ],
+        'factories' => [
+            'CmsJquery\View\Helper\Plugins\Ui' => 'CmsJquery\Factory\View\Helper\UiHelperFactory',
+        ],
+        'invokables' => [
+            'maphilight' => 'CmsJquery\View\Helper\Plugins\MapHilight',
         ],
     ],
     'router' => [
@@ -47,11 +87,25 @@ return [
             ],
         ],
     ],
-    'view_manager' => [
-        'template_map' => [
-            'layout/jquery' => __DIR__ . '/../view/layout/jquery.phtml',
-            'jquery' => __DIR__ . '/../view/layout/jquery.phtml',
+    'service_manager' => [
+        'aliases' => [
+            'CmsJquery\Options\ModuleOptionsInterface' => 'CmsJquery\Options\ModuleOptions',
+            'JQueryPluginManager' => 'CmsJquery\Plugin\JQueryPluginManager',
         ],
+        'factories' => [
+            'CmsJquery\Options\ModuleOptions' => 'CmsJquery\Factory\ModuleOptionsFactory',
+            'CmsJquery\Plugin\JQueryPluginManager' => 'CmsJquery\Factory\JQueryPluginManagerFactory',
+        ],
+    ],
+    'view_helpers' => [
+        'aliases' => [
+            'jQuery' => 'CmsJquery\View\Helper\JQuery',
+        ],
+        'factories' => [
+            'CmsJquery\View\Helper\JQuery' => 'CmsJquery\Factory\View\Helper\JQueryHelperFactory',
+        ],
+    ],
+    'view_manager' => [
         'template_path_stack' => [
             __NAMESPACE__ => __DIR__ . '/../view',
         ],
