@@ -19,6 +19,8 @@ class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
 {
     /**
      * {@inheritDoc}
+     *
+     * @return CustomPlugin
      */
     public function canCreateServiceWithName(ServiceLocatorInterface $plugins, $name, $requestedName)
     {
@@ -40,7 +42,7 @@ class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
             $plugin = $options->getPlugins()[$requestedName];
         }
 
-        return is_string($plugin) || !empty($plugin['path']);
+        return is_string($plugin) || !empty($plugin['files']);
     }
 
     /**
@@ -65,7 +67,7 @@ class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
         }
 
         if (is_string($plugin)) {
-            $plugin = ['path' => $plugin];
+            $plugin = ['files' => $plugin];
         }
 
         if (empty($plugin['name'])) {

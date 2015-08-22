@@ -10,7 +10,9 @@
 
 namespace CmsJquery\View\Helper\Plugins;
 
-use Zend\Json\Json,
+use Zend\Filter\FilterChain,
+    Zend\Filter\FilterInterface,
+    Zend\Json\Json,
     Zend\Stdlib\InitializableInterface,
     Zend\View\Helper\AbstractHelper,
     JSMin\JSMin;
@@ -29,7 +31,37 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
     /**
      * @var string
      */
-    protected $subPath = 'plugins/';
+    protected $name;
+
+    /**
+     * @var array
+     */
+    protected $options = [];
+
+    /**
+     * @var string
+     */
+    protected $element;
+
+    /**
+     * @var array
+     */
+    protected $files = [];
+
+    /**
+     * @var array
+     */
+    protected $cssFiles = [];
+
+    /**
+     * @var bool
+     */
+    protected $onload = false;
+
+    /**
+     * @var string
+     */
+    protected $basePath = 'plugins/';
 
     /**
      * @var bool
@@ -67,9 +99,46 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
     ];
 
     /**
+     * @var FilterInterface
+     */
+    private $methodNameFilter;
+
+    /**
+     * __construct
+     *
+     * @param array $options
+     */
+    public function __construct(array $options = [])
+    {
+        foreach ($options as $name => $value) {
+            $setter = $this->normalizeMethodName("set_$name");
+            if (method_exists($this, $setter)) {
+                $this->$setter($value);
+            }
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
-    public function init() {}
+    public function init()
+    {
+        foreach ($this->basePath($this->getFiles()) as $file) {
+            $this->headScript()->appendFile($file);
+        }
+
+        foreach ($this->basePath($this->getCssFiles()) as $file) {
+            $this->headLink()->appendStylesheet($file);
+        }
+
+        if ($this->getElement() && $this->getName()) {
+            $options = $this->hasOptions() ? $this->encode($this->getOptions()) : '';
+            $this->headScript()->appendScript(<<<EOJ
+$(function(){ $("{$this->getElement()}").{$this->getName()}({$options}); });
+EOJ
+            );
+        }
+    }
 
     /**
      * @param mixed $content
@@ -189,6 +258,122 @@ EOJ;
     }
 
     /**
+     * @param string $name
+     * @return self
+     */
+    public function setName($name)
+    {
+        $this->name = (string) $name;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param array $options
+     * @return self
+     */
+    public function setOptions(array $options)
+    {
+        $this->options = $options;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasOptions()
+    {
+        return (bool) $this->options;
+    }
+
+    /**
+     * @param string $element
+     * @return self
+     */
+    public function setElement($element)
+    {
+        $this->element = $element;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getElement()
+    {
+        return $this->element;
+    }
+
+    /**
+     * @param array|string $files
+     * @return self
+     */
+    public function setFiles($files)
+    {
+        $this->files = (array) $files;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getFiles()
+    {
+        return $this->files;
+    }
+
+    /**
+     * @param array|string $cssFiles
+     * @return self
+     */
+    public function setCssFiles($files)
+    {
+        $this->cssFiles = (array) $files;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getCssFiles()
+    {
+        return $this->cssFiles;
+    }
+
+    /**
+     * @return bool $flag
+     * @return self
+     */
+    public function setOnload($flag)
+    {
+        $this->onload = (bool) $flag;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function getOnload()
+    {
+        return $this->onload;
+    }
+
+    /**
      * @param array|string $path
      * @return string
      */
@@ -197,7 +382,7 @@ EOJ;
         if (is_string($path)) {
             /* @var $assetPath \CmsCommon\View\Helper\AssetPath */
             $assetPath = $this->getView()->plugin('assetPath');
-            return $assetPath($this->getSubPath() . ltrim((string) $path, '/\\'), $this->getNamespace());
+            return $assetPath($this->getBasePath() . ltrim((string) $path, '/\\'), $this->getNamespace());
         }
 
         return array_map([$this, 'basePath'], $path);
@@ -235,18 +420,18 @@ EOJ;
      * @param string $path
      * @return self
      */
-    public function setSubPath($path)
+    public function setBasePath($path)
     {
-        $this->subPath = $path;
+        $this->basePath = $path;
         return $this;
     }
 
     /**
      * @return string
      */
-    protected function getSubPath()
+    protected function getBasePath()
     {
-        return $this->subPath;
+        return $this->basePath;
     }
 
     /**
@@ -320,5 +505,32 @@ EOJ;
     protected function minifyScript($script)
     {
         return JsMin::minify($script);
+    }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    private function normalizeMethodName($name)
+    {
+        return lcfirst($this->getMethodNameFilter()->filter($name));
+    }
+
+    /**
+     * @return FilterInterface
+     */
+    private function getMethodNameFilter()
+    {
+        if (null === $this->methodNameFilter) {
+            $this->methodNameFilter = new FilterChain([
+                'filters' => [
+                    ['name' => 'WordUnderscoreToCamelCase'],
+                    ['name' => 'WordDashToCamelCase'],
+                    ['name' => 'WordSeparatorToCamelCase'],
+                ],
+            ]);
+        }
+
+        return $this->methodNameFilter;
     }
 }

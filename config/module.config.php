@@ -20,27 +20,29 @@ return [
     ],
     'cmsjquery' => [
         'plugins' => [
-            'ui' => ['onLoad' => true],
+            'ui' => ['onload' => true],
             'placeholder' => [
-                'path' => 'jquery.placeholder.min.js',
+                'files' => 'jquery.placeholder.min.js',
                 'element' => 'input,textarea',
-                'onLoad' => true,
+                'onload' => true,
             ],
             'cookie' => [
-                'path' => 'jquery.cookie.min.js',
-                'onLoad' => true,
+                'files' => 'jquery.cookie.min.js',
+                'onload' => true,
             ],
             'nicescroll' => [
-                'path' => 'nicescroll/jquery.nicescroll.min.js',
-                'onLoad' => true,
+                'files' => 'nicescroll/jquery.nicescroll.min.js',
+                'onload' => true,
             ],
             'verticalaligncenter' => [
-                'path' => 'jquery.verticalaligncenter.js',
+                'files' => 'jquery.verticalaligncenter.js',
                 'name' => 'verticalAlignCenter',
                 'element' => '.verticalcenter',
-                'onLoad' => true,
+                'onload' => true,
             ],
-            'maphilight' => [],
+            'maphilight' => [
+                'files' => 'jquery.maphilight.min.js',
+            ],
         ],
     ],
     'controllers' => [

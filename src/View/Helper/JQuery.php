@@ -126,17 +126,38 @@ class JQuery extends AbstractHelper
     {
         $options = $this->getOptions();
         foreach ($options->getPlugins() as $plugin => $options) {
-            if (is_string($options)) {
+            if (is_int($plugin)) {
                 $plugin = $options;
-                $options = [];
             }
 
-            if (!empty($options['onLoad'])) {
-                $this->jQueryPluginManager->get($plugin, $options);
+            if (!empty($options['onload'])) {
+                $this->getPlugin($plugin);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return AbstractPlugin
+     */
+    public function getPlugin($name)
+    {
+        $plugins = $this->getJQueryPluginManager();
+        if ($plugins->has($name)) {
+            $options = $this->getOptions();
+            foreach ($options->getPlugins() as $plugin => $options) {
+                if (is_int($plugin)) {
+                    $plugin = $options;
+                    $options = [];
+                }
+
+                if (strtolower($plugin) === strtolower($name)) {
+                    return $plugins->get($name, $options);
+                }
+            }
+        }
     }
 
     /**
@@ -148,9 +169,7 @@ class JQuery extends AbstractHelper
     {
         $this->__initialized__ && $this->__initialized__->__invoke();
 
-        $plugins = $this->getJQueryPluginManager();
-        if ($plugins->has($method)) {
-            $plugin = $plugins->get($method);
+        if ($plugin = $this->getPlugin($method)) {
             if (!$args) {
                 return $plugin;
             }
@@ -243,7 +262,6 @@ class JQuery extends AbstractHelper
 {$this->headScript()}
 JQUERY;
         } catch (\Exception $e) {
-            echo $e->getMessage();
             return '';
         }
     }

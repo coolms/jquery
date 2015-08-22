@@ -16,14 +16,6 @@ namespace CmsJquery\View\Helper\Plugins;
 class MapHilight extends AbstractPlugin
 {
     /**
-     * {@inheritDoc}
-     */
-    public function init()
-    {
-        $this->inlineScript()->appendFile($this->basePath('jquery.maphilight.min.js'));
-    }
-
-    /**
      * @param string $imageId
      * @param array $options
      * @param array $uitooltip
