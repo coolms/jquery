@@ -151,6 +151,10 @@ class JQuery extends AbstractHelper
         $plugins = $this->getJQueryPluginManager();
         if ($plugins->has($method)) {
             $plugin = $plugins->get($method);
+            if (!$args) {
+                return $plugin;
+            }
+
             array_splice($args, 1, 0, [null, null]);
             return call_user_func_array($plugin, $args);
         }
