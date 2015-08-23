@@ -15,7 +15,10 @@ use Zend\Filter\FilterChain,
     Zend\Json\Json,
     Zend\Stdlib\InitializableInterface,
     Zend\View\Helper\AbstractHelper,
+    Zend\View\Helper\HeadScript,
+    Zend\View\Helper\InlineScript,
     JSMin\JSMin;
+use CmsJquery\Stdlib\AbstractObject;
 
 /**
  * @author Dmitry Popov <d.popov@altgraphic.com>
@@ -67,6 +70,11 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
      * @var bool
      */
     protected $appendScript = true;
+
+    /**
+     * @var string
+     */
+    protected $script;
 
     /**
      * @var bool
@@ -123,17 +131,18 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
      */
     public function init()
     {
-        foreach ($this->basePath($this->getFiles()) as $file) {
-            $this->headScript()->appendFile($file);
-        }
-
         foreach ($this->basePath($this->getCssFiles()) as $file) {
             $this->headLink()->appendStylesheet($file);
         }
 
+        $scriptHelper = $this->getScriptHelper();
+        foreach ($this->basePath($this->getFiles()) as $file) {
+            $scriptHelper->appendFile($file);
+        }
+
         if ($this->getElement() && $this->getName()) {
             $options = $this->hasOptions() ? $this->encode($this->getOptions()) : '';
-            $this->headScript()->appendScript(<<<EOJ
+            $scriptHelper->appendScript(<<<EOJ
 $(function(){ $("{$this->getElement()}").{$this->getName()}({$options}); });
 EOJ
             );
@@ -141,119 +150,61 @@ EOJ
     }
 
     /**
-     * @param mixed $content
-     * @param bool  $appendScript
-     * @param bool  $renderScriptAsTemplate
+     * @param mixed $element
+     * @param array $options
      * @return array|string|self
      */
-    public function __invoke($content = null, $appendScript = null, $renderScriptAsTemplate = null)
+    public function __invoke($element = null, $options = [])
     {
         if (0 === func_num_args()) {
             return $this;
-        }
-
-        if (null !== $appendScript) {
-            $this->setAppendScript($appendScript);
-        }
-
-        if (null !== $renderScriptAsTemplate) {
-            $this->setRenderScriptAsTemplate($renderScriptAsTemplate);
         }
 
         return call_user_func_array([$this, 'render'], func_get_args());
     }
 
     /**
-     * @param mixed $content
-     * @param bool  $appendScript
-     * @param bool  $renderScriptAsTemplate
+     * @param string $element
+     * @param array $options
      * @return array|string|self
      */
-    public function render($content, $appendScript = null, $renderScriptAsTemplate = null)
+    public function render($element, array $options = [])
     {
-        if (method_exists($this, 'renderContent')) {
-            $funcArgs = [];
-            if (func_num_args() > 3) {
-                $funcArgs = array_slice(func_get_args(), 3);
-            }
-
-            array_unshift($funcArgs, $content);
-            $content = call_user_func_array([$this, 'renderContent'], $funcArgs);
+        if (!is_string($element)) {
+            
         }
 
-        if (!is_array($content)) {
-            return (string) $content;
-        }
-
-        $html           = '';
-        $headScript     = '';
-        $inlineScript   = '';
-        $contentId      = null;
-
-        switch (count($content)) {
-            case 1:
-                list($html) = $content;
-                break;
-            case 2:
-                list($html, $headScript) = $content;
-                break;
-            case 3:
-                list($html, $headScript, $inlineScript) = $content;
-                break;
-            case 4:
-                list($html, $headScript, $inlineScript, $contentId) = $content;
-                break;
-            default:
-                return '';
-        }
-
-        if (null === $appendScript) {
-            $appendScript = $this->getAppendScript();
-        }
-
-        if (null === $renderScriptAsTemplate) {
-            $appendScript = $this->getAppendScript();
-        }
+        $options = $options ? array_merge($this->getOptions(), $options) : $this->getOptions();
+        $this->script = sprintf(<<<EOJ
+    jQuery("%s").%s(%s);
+EOJ
+            ,
+            $element,
+            $this->getName(),
+            $this->encode($options ?: new \stdClass())
+        ) . $this->script;
 
         if ($this->getMinifyScript()) {
-            if ($headScript) {
-                $headScript = $this->minifyScript($headScript);
-            }
-
-            if ($inlineScript) {
-                $inlineScript = $this->minifyScript($inlineScript);
-            }
+            $this->script = $this->minifyScript($this->script);
         }
 
-        if ($appendScript) {
-            if ($headScript) {
-                $this->headScript()->appendScript($headScript);
-            }
-
-            if ($inlineScript) {
-                $inlineScript = <<<EOJ
-;jQuery(function(){ {$inlineScript} });
+        if ($this->getAppendScript()) {
+            $this->script = <<<EOJ
+;jQuery(function(){ {$this->script} });
 EOJ;
-                if ($this->getRenderScriptAsTemplate()) {
-                    $attribs = $this->templateScriptAttribs;
-                    if ($contentId) {
-                        $attribs['id'] = $contentId . '_script';
-                    }
+            if ($this->getRenderScriptAsTemplate()) {
+                $attribs = $this->templateScriptAttribs;
+                $attribs['id'] = "{$element}_script";
 
-                    if (!isset($attribs['noescape'])) {
-                        $attribs['noescape'] = true;
-                    }
-
-                    $this->inlineScript()->setAllowArbitraryAttributes(true)
-                        ->appendScript($inlineScript, $this->templateType, $attribs);
-                } else {
-                    $this->inlineScript()->appendScript($inlineScript);
+                if (!isset($attribs['noescape'])) {
+                    $attribs['noescape'] = true;
                 }
-            }
 
-            return $html;
-        } else {
-            return compact('html', 'headScript', 'inlineScript', 'templateId');
+                $this->getScriptHelper()->setAllowArbitraryAttributes(true)
+                    ->appendScript($this->script, $this->templateType, $attribs);
+            } else {
+                $this->getScriptHelper()->appendScript($this->script);
+            }
         }
     }
 
@@ -374,6 +325,14 @@ EOJ;
     }
 
     /**
+     * @return string
+     */
+    public function getScript()
+    {
+        return $this->script;
+    }
+
+    /**
      * @param array|string $path
      * @return string
      */
@@ -404,6 +363,15 @@ EOJ;
     protected function jQuery()
     {
         return $this->getView()->plugin('jQuery');
+    }
+
+    /**
+     * @return HeadScript|InlineScript
+     */
+    protected function getScriptHelper()
+    {
+        $scriptHelper = $this->getOnload() ? 'headScript' : 'inlineScript';
+        return $this->$scriptHelper();
     }
 
     /**

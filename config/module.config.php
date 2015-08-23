@@ -20,7 +20,9 @@ return [
     ],
     'cmsjquery' => [
         'plugins' => [
-            'ui' => ['onload' => true],
+            'ui' => [
+                'onload' => true,
+            ],
             'placeholder' => [
                 'files' => 'jquery.placeholder.min.js',
                 'element' => 'input,textarea',
@@ -44,6 +46,9 @@ return [
                 'files' => 'jquery.maphilight.min.js',
             ],
         ],
+    ],
+    'cmslayout' => [
+        'wrapper' => 'jquery/wrapper',
     ],
     'controllers' => [
         'invokables' => [
@@ -108,6 +113,9 @@ return [
         ],
     ],
     'view_manager' => [
+        'template_map' => [
+            'jquery/wrapper' => __DIR__ . '/../view/wrapper.phtml',
+        ],
         'template_path_stack' => [
             __NAMESPACE__ => __DIR__ . '/../view',
         ],

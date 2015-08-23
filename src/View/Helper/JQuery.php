@@ -161,6 +161,17 @@ class JQuery extends AbstractHelper
     }
 
     /**
+     * @param string $plugin
+     * @return AbstractPlugin
+     */
+    public function __get($plugin)
+    {
+        $this->__initialized__ && $this->__initialized__->__invoke();
+
+        return $this->getPlugin($plugin);
+    }
+
+    /**
      * @param string $method
      * @param array $args
      * @return AbstractPlugin
@@ -170,11 +181,6 @@ class JQuery extends AbstractHelper
         $this->__initialized__ && $this->__initialized__->__invoke();
 
         if ($plugin = $this->getPlugin($method)) {
-            if (!$args) {
-                return $plugin;
-            }
-
-            array_splice($args, 1, 0, [null, null]);
             return call_user_func_array($plugin, $args);
         }
     }

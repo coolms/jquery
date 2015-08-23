@@ -16,27 +16,18 @@ namespace CmsJquery\View\Helper\Plugins;
 class MapHilight extends AbstractPlugin
 {
     /**
-     * @param string $imageId
-     * @param array $options
+     * {@inheritDoc}
+     *
      * @param array $uitooltip
-     * @return array
      */
-    protected function renderContent($imageId, array $options = [], array $uitooltip = [])
+    public function render($element, array $options = [], array $uitooltip = [])
     {
-        if (!$options) {
-            $options = new \stdClass();
-        }
-
-        $inlineScript[] = <<<EOJ
-    $("#{$imageId}").maphilight({$this->encode($options)});
-EOJ;
-
         if ($uitooltip) {
-            $inlineScript[] = <<<EOJ
-    $("#{$imageId}-map area").uitooltip({$this->encode($uitooltip)});
+            $this->script = <<<EOJ
+    $("{$element}-map area").uitooltip({$this->encode($uitooltip)});
 EOJ;
         }
 
-        return [null, null, implode("\n", $inlineScript)];
+        parent::render($element, $options);
     }
 }

@@ -148,6 +148,20 @@ class JQueryPluginManager extends AbstractPluginManager
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @return AbstractPlugin
+     */
+    public function get($name, $options = array(), $usePeeringServiceManagers = true)
+    {
+        if (empty($options['name'])) {
+            $options['name'] = $name;
+        }
+
+        return parent::get($name, $options, $usePeeringServiceManagers);
+    }
+
+    /**
      * Validate the plugin
      *
      * Checks that the plugin is an instance of AbstractPlugin

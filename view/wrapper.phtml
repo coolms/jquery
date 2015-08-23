@@ -1,0 +1,41 @@
+<?php
+/**
+ * CoolMS2 jQuery Module (http://www.coolms.com/)
+ *
+ * @link      http://github.com/coolms/jquery for the canonical source repository
+ * @copyright Copyright (c) 2006-2015 Altgraphic, ALC (http://www.altgraphic.com)
+ * @license   http://www.coolms.com/license/new-bsd New BSD License
+ * @author    Dmitry Popov <d.popov@altgraphic.com>
+ */
+
+namespace CmsJquery;
+
+?>
+<?= $this->doctype(); ?>
+
+<html lang="<?= $this->locale()->language(); ?>">
+  <head>
+    <?= $this->headTitle(); ?>
+
+    <!-- Meta -->
+    <?= $this->headMeta(); ?>
+
+    <!-- jQuery -->
+    <?= $this->jQuery(); ?>
+
+    <!-- Links & Stylesheets -->
+    <?= $this->headLink(); ?>
+
+    <!-- Styles -->
+    <?= $this->headStyle(); ?>
+
+    <!-- Scripts -->
+    <?= $this->headScript(); ?>
+
+  </head>
+
+  <body>
+    <?= $this->content; ?>
+    <?= $this->inlineScript(); ?>
+  </body>
+</html>
