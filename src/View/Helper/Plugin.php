@@ -8,12 +8,14 @@
  * @author    Dmitry Popov <d.popov@altgraphic.com>
  */
 
-namespace CmsJquery\View\Helper\Plugins;
+namespace CmsJquery\View\Helper;
+
+use CmsJquery\View\Helper\Plugin\AbstractPlugin;
 
 /**
  * @author Dmitry Popov <d.popov@altgraphic.com>
  */
-class CustomPlugin extends AbstractPlugin
+class Plugin extends AbstractPlugin
 {
     
 }

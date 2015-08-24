@@ -16,7 +16,7 @@ use Zend\I18n\Translator\TranslatorAwareInterface,
     Zend\Stdlib\InitializableInterface,
     Zend\View\Helper,
     Zend\View\Renderer,
-    CmsJquery\View\Helper\Plugins\AbstractPlugin;
+    CmsJquery\View\Helper\Plugin\AbstractPlugin;
 
 /**
  * Plugin manager implementation for jQuery plugins.
@@ -177,7 +177,7 @@ class JQueryPluginManager extends AbstractPluginManager
 
         throw new \InvalidArgumentException(sprintf(
             'Can\'t create jQuery plugin for %s; ' .
-            'Plugin must be an instance of CmsJquery\View\Helper\Plugins\AbstractPlugin',
+            'Plugin must be an instance of CmsJquery\View\Helper\Plugin\AbstractPlugin',
             (is_object($plugin) ? get_class($plugin) : gettype($plugin))
         ));
     }

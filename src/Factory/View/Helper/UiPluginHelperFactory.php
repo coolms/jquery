@@ -12,9 +12,9 @@ namespace CmsJquery\Factory\View\Helper;
 
 use Zend\ServiceManager\FactoryInterface,
     Zend\ServiceManager\ServiceLocatorInterface,
-    CmsJquery\View\Helper\Plugins\Ui;
+    CmsJquery\View\Helper\Plugin\Ui;
 
-class UiHelperFactory implements FactoryInterface
+class UiPluginHelperFactory implements FactoryInterface
 {
     /**
      * {@inheritDoc}

@@ -8,17 +8,21 @@
  * @author    Dmitry Popov <d.popov@altgraphic.com>
  */
 
-namespace CmsJquery\View\Helper\Plugins;
+namespace CmsJquery\View\Helper\Plugin;
 
 use Zend\Filter\FilterChain,
     Zend\Filter\FilterInterface,
     Zend\Json\Json,
+    Zend\Stdlib\AbstractOptions,
     Zend\Stdlib\InitializableInterface,
     Zend\View\Helper\AbstractHelper,
     Zend\View\Helper\HeadScript,
     Zend\View\Helper\InlineScript,
-    JSMin\JSMin;
-use CmsJquery\Stdlib\AbstractObject;
+    Zend\View\Helper\Placeholder\Container,
+    JSMin\JSMin,
+    CmsCommon\Stdlib\ArrayUtils,
+    CmsJquery\Stdlib\AbstractObject,
+    CmsJquery\View\Helper\JQuery;
 
 /**
  * @author Dmitry Popov <d.popov@altgraphic.com>
@@ -37,14 +41,14 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
     protected $name;
 
     /**
-     * @var array
-     */
-    protected $options = [];
-
-    /**
      * @var string
      */
     protected $element;
+
+    /**
+     * @var array
+     */
+    protected $defaults = [];
 
     /**
      * @var array
@@ -55,6 +59,11 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
      * @var array
      */
     protected $cssFiles = [];
+
+    /**
+     * @var array
+     */
+    protected $options = [];
 
     /**
      * @var bool
@@ -72,9 +81,14 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
     protected $appendScript = true;
 
     /**
-     * @var string
+     * @var Container
      */
-    protected $script;
+    private $script;
+
+    /**
+     * @var Container
+     */
+    private $markup;
 
     /**
      * @var bool
@@ -114,15 +128,12 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
     /**
      * __construct
      *
-     * @param array $options
+     * @param array|\Traversable $options
      */
-    public function __construct(array $options = [])
+    public function __construct($options = null)
     {
-        foreach ($options as $name => $value) {
-            $setter = $this->normalizeMethodName("set_$name");
-            if (method_exists($this, $setter)) {
-                $this->$setter($value);
-            }
+        if (null !== $options) {
+            $this->setOptions($options);
         }
     }
 
@@ -131,21 +142,14 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
      */
     public function init()
     {
-        foreach ($this->basePath($this->getCssFiles()) as $file) {
-            $this->headLink()->appendStylesheet($file);
-        }
+        $cssFiles = array_map([$this, 'basePath'], $this->getCssFiles());
+        array_map([$this->headLink(), 'appendStylesheet'], $cssFiles);
 
-        $scriptHelper = $this->getScriptHelper();
-        foreach ($this->basePath($this->getFiles()) as $file) {
-            $scriptHelper->appendFile($file);
-        }
+        $files = array_map([$this, 'basePath'], $this->getFiles());
+        array_map([$this->scriptHelper(), 'appendFile'], $files);
 
         if ($this->getElement() && $this->getName()) {
-            $options = $this->hasOptions() ? $this->encode($this->getOptions()) : '';
-            $scriptHelper->appendScript(<<<EOJ
-$(function(){ $("{$this->getElement()}").{$this->getName()}({$options}); });
-EOJ
-            );
+            $this->render($this->getElement());
         }
     }
 
@@ -154,7 +158,7 @@ EOJ
      * @param array $options
      * @return array|string|self
      */
-    public function __invoke($element = null, $options = [])
+    public function __invoke($element = null, array $options = [])
     {
         if (0 === func_num_args()) {
             return $this;
@@ -170,42 +174,41 @@ EOJ
      */
     public function render($element, array $options = [])
     {
-        if (!is_string($element)) {
-            
-        }
-
-        $options = $options ? array_merge($this->getOptions(), $options) : $this->getOptions();
-        $this->script = sprintf(<<<EOJ
-    jQuery("%s").%s(%s);
+        if (is_string($element)) {
+            $options = $options ? array_merge($this->getDefaults(), $options) : $this->getDefaults();
+            $this->script()->prepend(sprintf(<<<EOJ
+jQuery("%s").%s(%s);
 EOJ
-            ,
-            $element,
-            $this->getName(),
-            $this->encode($options ?: new \stdClass())
-        ) . $this->script;
-
-        if ($this->getMinifyScript()) {
-            $this->script = $this->minifyScript($this->script);
+                ,
+                $element,
+                $this->getName(),
+                $this->encode($options ?: new \stdClass())
+            ));
         }
 
         if ($this->getAppendScript()) {
-            $this->script = <<<EOJ
-;jQuery(function(){ {$this->script} });
+            $script = <<<EOJ
+;jQuery(function(){ {$this->getScript()} });
 EOJ;
+
             if ($this->getRenderScriptAsTemplate()) {
                 $attribs = $this->templateScriptAttribs;
-                $attribs['id'] = "{$element}_script";
+                if (is_string($element)) {
+                    $attribs['id'] = "{$element}_script";
+                }
 
                 if (!isset($attribs['noescape'])) {
                     $attribs['noescape'] = true;
                 }
 
-                $this->getScriptHelper()->setAllowArbitraryAttributes(true)
-                    ->appendScript($this->script, $this->templateType, $attribs);
+                $this->scriptHelper()->setAllowArbitraryAttributes(true)
+                    ->appendScript($script, $this->templateType, $attribs);
             } else {
-                $this->getScriptHelper()->appendScript($this->script);
+                $this->scriptHelper()->appendScript($script);
             }
         }
+
+        return (string) $this->markup();
     }
 
     /**
@@ -227,32 +230,6 @@ EOJ;
     }
 
     /**
-     * @param array $options
-     * @return self
-     */
-    public function setOptions(array $options)
-    {
-        $this->options = $options;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return $this->options;
-    }
-
-    /**
-     * @return bool
-     */
-    protected function hasOptions()
-    {
-        return (bool) $this->options;
-    }
-
-    /**
      * @param string $element
      * @return self
      */
@@ -268,6 +245,24 @@ EOJ;
     protected function getElement()
     {
         return $this->element;
+    }
+
+    /**
+     * @param array $defaults
+     * @return self
+     */
+    public function setDefaults($defaults)
+    {
+        $this->defaults = (array) $defaults;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getDefaults()
+    {
+        return $this->defaults;
     }
 
     /**
@@ -307,6 +302,59 @@ EOJ;
     }
 
     /**
+     * @param array|Traversable|AbsractOptions $options
+     * @return self
+     */
+    public function setOptions($options)
+    {
+        if (!is_array($options)) {
+            if ($options instanceof AbstractOptions) {
+                $options = $options->toArray();
+            } else {
+                $options = ArrayUtils::iteratorToArray($options);
+            }
+        }
+
+        foreach ($options as $name => $value) {
+            $setter = $this->normalizeMethodName("set_$name");
+            if (method_exists($this, $setter)) {
+                $this->$setter($value);
+            } else {
+                $this->options[$name] = $value;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    protected function getOption($name)
+    {
+        if (isset($this->options[$name])) {
+            return $this->options[$name];
+        }
+    }
+
+    /**
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasOptions()
+    {
+        return (bool) $this->options;
+    }
+
+    /**
      * @return bool $flag
      * @return self
      */
@@ -329,7 +377,36 @@ EOJ;
      */
     public function getScript()
     {
+        $script = (string) $this->script();
+        if ($this->getMinifyScript()) {
+            return $this->minifyScript($script);
+        }
+
+        return $script;
+    }
+
+    /**
+     * @return Container
+     */
+    protected function script()
+    {
+        if (null === $this->script) {
+            $this->script = new Container();
+        }
+
         return $this->script;
+    }
+
+    /**
+     * @return Container
+     */
+    protected function markup()
+    {
+        if (null === $this->markup) {
+            $this->markup = new Container();
+        }
+
+        return $this->markup;
     }
 
     /**
@@ -358,7 +435,7 @@ EOJ;
     }
 
     /**
-     * {@inheritDoc}
+     * @return JQuery
      */
     protected function jQuery()
     {
@@ -368,7 +445,7 @@ EOJ;
     /**
      * @return HeadScript|InlineScript
      */
-    protected function getScriptHelper()
+    protected function scriptHelper()
     {
         $scriptHelper = $this->getOnload() ? 'headScript' : 'inlineScript';
         return $this->$scriptHelper();
@@ -470,7 +547,7 @@ EOJ;
      * @param $script
      * @return array
      */
-    protected function minifyScript($script)
+    public function minifyScript($script)
     {
         return JsMin::minify($script);
     }

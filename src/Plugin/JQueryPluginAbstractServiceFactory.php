@@ -13,14 +13,12 @@ namespace CmsJquery\Plugin;
 use Zend\ServiceManager\AbstractFactoryInterface,
     Zend\ServiceManager\AbstractPluginManager,
     Zend\ServiceManager\ServiceLocatorInterface,
-    CmsJquery\View\Helper\Plugins\CustomPlugin;
+    CmsJquery\View\Helper\Plugin;
 
 class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
 {
     /**
      * {@inheritDoc}
-     *
-     * @return CustomPlugin
      */
     public function canCreateServiceWithName(ServiceLocatorInterface $plugins, $name, $requestedName)
     {
@@ -38,17 +36,13 @@ class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
             $plugin = $options->getPlugins()[$requestedName];
         }
 
-        if (isset($options->getUiPlugins()[$requestedName])) {
-            $plugin = $options->getPlugins()[$requestedName];
-        }
-
         return is_string($plugin) || !empty($plugin['files']);
     }
 
     /**
      * {@inheritDoc}
      *
-     * @return CustomPlugin
+     * @return Plugin
      */
     public function createServiceWithName(ServiceLocatorInterface $plugins, $name, $requestedName)
     {
@@ -60,12 +54,7 @@ class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
         $services = $plugins->getServiceLocator();
         $options  = $services->get('CmsJquery\\Options\\ModuleOptions');
 
-        if (isset($options->getPlugins()[$requestedName])) {
-            $plugin = $options->getPlugins()[$requestedName];
-        } else {
-            $plugin = $options->getUiPlugins()[$requestedName];
-        }
-
+        $plugin = $options->getPlugins()[$requestedName];
         if (is_string($plugin)) {
             $plugin = ['files' => $plugin];
         }
@@ -74,6 +63,6 @@ class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
             $plugin['name'] = $requestedName;
         }
 
-        return new CustomPlugin($plugin);
+        return new Plugin($plugin);
     }
 }

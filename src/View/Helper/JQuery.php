@@ -17,16 +17,16 @@ use Zend\View\Helper\AbstractHelper,
     Zend\View\Helper\HeadScript,
     Zend\View\Helper\InlineScript,
     CmsCommon\Stdlib\OptionsProviderTrait,
-    CmsJquery\Options\ModuleOptionsInterface,
+    CmsJquery\Options\JQueryOptionsInterface,
     CmsJquery\Plugin\JQueryPluginManager,
     CmsJquery\Plugin\JQueryPluginManagerAwareTrait,
-    CmsJquery\View\Helper\Plugins\AbstractPlugin;
+    CmsJquery\View\Helper\Plugin\AbstractPlugin;
 
 /**
  * @author Dmitry Popov <d.popov@altgraphic.com>
  *
- * @method JQuery setOptions(\CmsJquery\Options\ModuleOptionsInterface $options)
- * @method \CmsJquery\Options\ModuleOptionsInterface getOptions()
+ * @method JQuery setOptions(\CmsJquery\Options\JQueryOptionsInterface $options)
+ * @method \CmsJquery\Options\JQueryOptionsInterface getOptions()
  */
 class JQuery extends AbstractHelper
 {
@@ -64,7 +64,7 @@ class JQuery extends AbstractHelper
      * @param ModuleOptionsInterface $options
      * @param JQueryPluginManager $plugins
      */
-    public function __construct(ModuleOptionsInterface $options, JQueryPluginManager $plugins)
+    public function __construct(JQueryOptionsInterface $options, JQueryPluginManager $plugins)
     {
         $this->setOptions($options);
         $this->setJQueryPluginManager($plugins);
@@ -110,12 +110,14 @@ class JQuery extends AbstractHelper
     {
         $options = $this->getOptions();
         if ($options->getUseCdn()) {
-            $path = $options->getCdnUrl();
+            $files = $options->getCdnFiles();
         } else {
-            $path = $this->getView()->basePath($options->getPath());
+            $files = array_map([$this->getView(), 'basePath'], $options->getFiles());
         }
 
-        $this->headScript()->appendFile(sprintf($path, $options->getVersion()));
+        $files = array_map('sprintf', $files, array_fill(0, count($files), $options->getVersion()));
+        array_map([$this->headScript(), 'appendFile'], $files);
+
         return $this;
     }
 

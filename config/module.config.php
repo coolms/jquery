@@ -61,13 +61,13 @@ return [
                 => 'CmsJquery\Plugin\JQueryPluginAbstractServiceFactory',
         ],
         'aliases' => [
-            'ui' => 'CmsJquery\View\Helper\Plugins\Ui',
+            'ui' => 'CmsJquery\View\Helper\Plugin\Ui',
         ],
         'factories' => [
-            'CmsJquery\View\Helper\Plugins\Ui' => 'CmsJquery\Factory\View\Helper\UiHelperFactory',
+            'CmsJquery\View\Helper\Plugin\Ui' => 'CmsJquery\Factory\View\Helper\UiPluginHelperFactory',
         ],
         'invokables' => [
-            'maphilight' => 'CmsJquery\View\Helper\Plugins\MapHilight',
+            'maphilight' => 'CmsJquery\View\Helper\Plugin\MapHilight',
         ],
     ],
     'router' => [

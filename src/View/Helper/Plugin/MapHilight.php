@@ -8,7 +8,7 @@
  * @author    Dmitry Popov <d.popov@altgraphic.com>
  */
 
-namespace CmsJquery\View\Helper\Plugins;
+namespace CmsJquery\View\Helper\Plugin;
 
 /**
  * @author Dmitry Popov <d.popov@altgraphic.com>
@@ -23,11 +23,12 @@ class MapHilight extends AbstractPlugin
     public function render($element, array $options = [], array $uitooltip = [])
     {
         if ($uitooltip) {
-            $this->script = <<<EOJ
+            $this->script()->append(<<<EOJ
     $("{$element}-map area").uitooltip({$this->encode($uitooltip)});
-EOJ;
+EOJ
+            );
         }
 
-        parent::render($element, $options);
+        return parent::render($element, $options);
     }
 }
