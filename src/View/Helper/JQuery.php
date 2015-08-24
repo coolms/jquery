@@ -109,11 +109,9 @@ class JQuery extends AbstractHelper
     protected function setup()
     {
         $options = $this->getOptions();
-        if ($options->getUseCdn()) {
-            $files = $options->getCdnFiles();
-        } else {
-            $files = array_map([$this->getView(), 'basePath'], $options->getFiles());
-        }
+        $files = $options->getUseCdn()
+            ? $options->getCdnFiles()
+            : array_map([$this->getView(), 'basePath'], $options->getFiles());
 
         $files = array_map('sprintf', $files, array_fill(0, count($files), $options->getVersion()));
         array_map([$this->headScript(), 'appendFile'], $files);
@@ -126,13 +124,9 @@ class JQuery extends AbstractHelper
      */
     protected function setupPlugins()
     {
-        $options = $this->getOptions();
-        foreach ($options->getPlugins() as $plugin => $options) {
-            if (is_int($plugin)) {
-                $plugin = $options;
-            }
-
-            if (!empty($options['onload'])) {
+        $plugins = $this->getOptions()->getPlugins();
+        foreach ($plugins as $plugin => $options) {
+            if (is_array($options) && !empty($options['onload'])) {
                 $this->getPlugin($plugin);
             }
         }
@@ -148,23 +142,8 @@ class JQuery extends AbstractHelper
     {
         $plugins = $this->getJQueryPluginManager();
         if ($plugins->has($name)) {
-            $options = $this->getOptions();
-            foreach ($options->getPlugins() as $plugin => $options) {
-                if (is_int($plugin)) {
-                    $plugin = $options;
-                    $options = [];
-                }
-
-                if (strtolower($plugin) === strtolower($name)) {
-                    try {
-                    return $plugins->get($name, $options);
-                    } catch (\Exception $e) {
-                        echo '<pre>';
-                        var_dump([$e->getMessage(), $e->getTraceAsString()]);
-                        echo '</pre>';
-                    }
-                }
-            }
+            $pluginOptions = $this->getOptions()->getPlugins();
+            return $plugins->get($name, isset($pluginOptions[$name]) ? $pluginOptions[$name] : []);
         }
     }
 
