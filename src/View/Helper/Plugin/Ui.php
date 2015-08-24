@@ -30,7 +30,7 @@ class Ui extends AbstractPlugin
         $options = $this->getOptions();
 
         if (!$this->getUseUi()) {
-            return $this;
+            return;
         }
 
         if ($this->getUseUiCdn()) {
@@ -60,5 +60,13 @@ $(function(){
 });
 EOJ
 );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function __invoke($element = null, array $options = [])
+    {
+        return $this;
     }
 }

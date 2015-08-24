@@ -156,7 +156,13 @@ class JQuery extends AbstractHelper
                 }
 
                 if (strtolower($plugin) === strtolower($name)) {
+                    try {
                     return $plugins->get($name, $options);
+                    } catch (\Exception $e) {
+                        echo '<pre>';
+                        var_dump([$e->getMessage(), $e->getTraceAsString()]);
+                        echo '</pre>';
+                    }
                 }
             }
         }

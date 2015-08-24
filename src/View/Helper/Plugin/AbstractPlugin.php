@@ -172,7 +172,7 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
      * @param array $options
      * @return array|string|self
      */
-    public function render($element, array $options = [])
+    protected function render($element, array $options = [])
     {
         if (is_string($element)) {
             $options = $options ? array_merge($this->getDefaults(), $options) : $this->getDefaults();
@@ -415,10 +415,19 @@ EOJ;
      */
     protected function basePath($path = null)
     {
+        if (!$path) {
+            return;
+        }
+
         if (is_string($path)) {
             /* @var $assetPath \CmsCommon\View\Helper\AssetPath */
             $assetPath = $this->getView()->plugin('assetPath');
-            return $assetPath($this->getBasePath() . ltrim((string) $path, '/\\'), $this->getNamespace());
+            $basePath  = $this->getBasePath();
+            if ($path[0] === '/' || !$basePath) {
+                return $assetPath($path, $this->getNamespace());
+            }
+
+            return $assetPath(rtrim($basePath, '/\\') . '/' . $path, $this->getNamespace());
         }
 
         return array_map([$this, 'basePath'], $path);

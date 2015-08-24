@@ -20,7 +20,7 @@ class MapHilight extends AbstractPlugin
      *
      * @param array $uitooltip
      */
-    public function render($element, array $options = [], array $uitooltip = [])
+    protected function render($element, array $options = [], array $uitooltip = [])
     {
         if ($uitooltip) {
             $this->script()->append(<<<EOJ
