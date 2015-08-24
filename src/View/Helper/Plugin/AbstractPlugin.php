@@ -392,6 +392,7 @@ EOJ;
     {
         if (null === $this->script) {
             $this->script = new Container();
+            $this->script->setSeparator(PHP_EOL);
         }
 
         return $this->script;
