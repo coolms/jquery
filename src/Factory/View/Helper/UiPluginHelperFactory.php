@@ -10,20 +10,25 @@
 
 namespace CmsJquery\Factory\View\Helper;
 
-use Zend\ServiceManager\FactoryInterface,
-    Zend\ServiceManager\ServiceLocatorInterface,
+use Zend\ServiceManager\ServiceLocatorInterface,
+    CmsJquery\Plugin\AbstractJQueryPluginFactory,
     CmsJquery\View\Helper\Plugin\Ui;
 
-class UiPluginHelperFactory implements FactoryInterface
+class UiPluginHelperFactory extends AbstractJQueryPluginFactory
 {
+    /**
+     * @var string
+     */
+    protected $optionsClass = 'CmsJquery\\Options\\ModuleOptions';
+
     /**
      * {@inheritDoc}
      *
      * @return Ui
      */
-    public function createService(ServiceLocatorInterface $helpers)
+    public function createService(ServiceLocatorInterface $plugins)
     {
-        $services = $helpers->getServiceLocator();
-        return new Ui($services->get('CmsJquery\\Options\\ModuleOptions'));
+        $services = $plugins->getServiceLocator();
+        return new Ui($this->getCreationOptions($services));
     }
 }

@@ -108,9 +108,7 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
     /**
      * @var array
      */
-    protected $templateScriptAttribs = [
-        'class' => 'jquery-script',
-    ];
+    protected $templateScriptAttribs = [];
 
     /**
      * @var array
@@ -182,7 +180,7 @@ EOJ
                 ,
                 $element,
                 $this->getName(),
-                $this->encode($options ?: new \stdClass())
+                $options ? $this->encode($options) : ''
             ));
         }
 
@@ -193,8 +191,28 @@ EOJ;
 
             if ($this->getRenderScriptAsTemplate()) {
                 $attribs = $this->templateScriptAttribs;
+
+                $idNormalizer = null;
+                $renderer = $this->getView();
+                if (method_exists($renderer, 'plugin')) {
+                    $idNormalizer = $renderer->plugin('idNormalizer');
+                }
+
                 if (is_string($element)) {
-                    $attribs['id'] = "{$element}_script";
+                    if ($idNormalizer) {
+                        $element = $idNormalizer($element);
+                    }
+
+                    $attribs['id'] = "$element-script";
+                }
+
+                if (!isset($attribs['class'])) {
+                    $name = $this->getName();
+                    if ($idNormalizer) {
+                        $name = $idNormalizer($name);
+                    }
+
+                    $attribs['class'] = "$name-script";
                 }
 
                 if (!isset($attribs['noescape'])) {
