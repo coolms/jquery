@@ -237,7 +237,10 @@ class JQuery extends AbstractHelper
      */
     public function inlineScript()
     {
-        return $this->getView()->plugin('inlineScript');
+        $renderer = $this->getView();
+        if (method_exists($renderer, 'plugin')) {
+            return $renderer->plugin('inlineScript');
+        }
     }
 
     /**
