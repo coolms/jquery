@@ -172,12 +172,15 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
      */
     protected function render($element, array $options = [])
     {
+        $jQuery = $this->jQuery()->getOptions()->getName();
+
         if (is_string($element)) {
             $options = $options ? array_merge($this->getDefaults(), $options) : $this->getDefaults();
             $this->script()->prepend(sprintf(<<<EOJ
-jQuery("%s").%s(%s);
+%s("%s").%s(%s);
 EOJ
                 ,
+                $jQuery,
                 $element,
                 $this->getName(),
                 $options ? $this->encode($options) : ''
@@ -186,7 +189,7 @@ EOJ
 
         if ($this->getAppendScript()) {
             $script = <<<EOJ
-;jQuery(function(){ {$this->getScript()} });
+;{$jQuery}(function(){ {$this->getScript()} });
 EOJ;
 
             if ($this->getRenderScriptAsTemplate()) {
@@ -467,7 +470,10 @@ EOJ;
      */
     protected function jQuery()
     {
-        return $this->getView()->plugin('jQuery');
+        $renderer = $this->getView();
+        if (method_exists($renderer, 'plugin')) {
+            return $renderer->plugin('jQuery');
+        }
     }
 
     /**

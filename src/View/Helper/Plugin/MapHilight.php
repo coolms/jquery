@@ -22,9 +22,11 @@ class MapHilight extends AbstractPlugin
      */
     protected function render($element, array $options = [], array $uitooltip = [])
     {
+        $jQuery = $this->jQuery()->getOptions()->getName();
+
         if ($uitooltip) {
             $this->script()->append(<<<EOJ
-    $("{$element}-map area").uitooltip({$this->encode($uitooltip)});
+    ;{$jQuery}("{$element}-map area").uitooltip({$this->encode($uitooltip)});
 EOJ
             );
         }

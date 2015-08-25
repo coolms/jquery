@@ -13,6 +13,17 @@ namespace CmsJquery\Options;
 interface JQueryOptionsInterface
 {
     /**
+     * @param string $name
+     * @return self
+     */
+    public function setName($name);
+
+    /**
+     * @return string
+     */
+    public function getName();
+
+    /**
      * @param bool $flag
      * @return self
      */

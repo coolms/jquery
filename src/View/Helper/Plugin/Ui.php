@@ -53,10 +53,11 @@ class Ui extends AbstractPlugin
 
         array_map([$this->headLink(), 'appendStylesheet'], $cssFiles);
 
+        $jQuery = $this->jQuery()->getOptions()->getName();
         $this->headScript()->appendScript(<<<EOJ
-$(function(){
-  $.widget.bridge("uibutton", $.ui.button);
-  $.widget.bridge("uitooltip", $.ui.tooltip);
+{$jQuery}(function(){
+  {$jQuery}.widget.bridge("uibutton", {$jQuery}.ui.button);
+  {$jQuery}.widget.bridge("uitooltip", {$jQuery}.ui.tooltip);
 });
 EOJ
 );

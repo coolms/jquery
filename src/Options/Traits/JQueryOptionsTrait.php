@@ -13,6 +13,11 @@ namespace CmsJquery\Options\Traits;
 trait JQueryOptionsTrait
 {
     /**
+     * @var string
+     */
+    protected $name = 'jQuery';
+
+    /**
      * @var bool
      */
     protected $enabled = true;
@@ -45,6 +50,23 @@ trait JQueryOptionsTrait
      * @var string
      */
     protected $plugins = [];
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setName($name)
+    {
+        $this->name = (string) $name;
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 
     /**
      * {@inheritDoc}
