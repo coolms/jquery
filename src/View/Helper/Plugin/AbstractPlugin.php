@@ -119,6 +119,11 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
     ];
 
     /**
+     * @var string
+     */
+    protected $namespace;
+
+    /**
      * @var FilterInterface
      */
     private $methodNameFilter;
@@ -568,11 +573,21 @@ EOJ;
     }
 
     /**
+     * @param string $namespace
+     * @return self
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = (string) $namespace;
+        return $this;
+    }
+
+    /**
      * @return string
      */
     protected function getNamespace()
     {
-        return __NAMESPACE__;
+        return $this->namespace ?: __NAMESPACE__;
     }
 
     /**

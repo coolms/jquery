@@ -127,7 +127,7 @@ class JQuery extends AbstractHelper
         $plugins = $this->getOptions()->getPlugins();
         foreach ($plugins as $plugin => $options) {
             if (is_array($options) && !empty($options['onload'])) {
-                $this->getPlugin($plugin);
+                $this->getPlugin($plugin, $options);
             }
         }
 
@@ -136,14 +136,21 @@ class JQuery extends AbstractHelper
 
     /**
      * @param string $name
+     * @param array $options
      * @return AbstractPlugin
      */
-    public function getPlugin($name)
+    protected function getPlugin($name, array $options = [])
     {
         $plugins = $this->getJQueryPluginManager();
         if ($plugins->has($name)) {
-            $pluginOptions = $this->getOptions()->getPlugins();
-            return $plugins->get($name, isset($pluginOptions[$name]) ? $pluginOptions[$name] : []);
+            if (!$options) {
+                $defaults = $this->getOptions()->getPlugins();
+                if (!empty($defaults[$name])) {
+                    $options = $defaults[$name];
+                }
+            }
+
+            return $plugins->get($name, $options);
         }
     }
 

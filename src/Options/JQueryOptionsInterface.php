@@ -80,6 +80,7 @@ interface JQueryOptionsInterface
 
     /**
      * @param array|string $plugins
+     * @return self
      */
     public function setPlugins($plugins);
 

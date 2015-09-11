@@ -47,7 +47,7 @@ trait JQueryOptionsTrait
     ];
 
     /**
-     * @var string
+     * @var array
      */
     protected $plugins = [];
 

@@ -12,11 +12,17 @@ namespace CmsJquery\Plugin;
 
 use Zend\ServiceManager\AbstractFactoryInterface,
     Zend\ServiceManager\AbstractPluginManager,
+    Zend\ServiceManager\MutableCreationOptionsInterface,
     Zend\ServiceManager\ServiceLocatorInterface,
     CmsJquery\View\Helper\Plugin;
 
-class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
+class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface, MutableCreationOptionsInterface
 {
+    /**
+     * @var array
+     */
+    protected $creationOptions = [];
+
     /**
      * {@inheritDoc}
      */
@@ -27,16 +33,7 @@ class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
                 'only with a plugin manager');
         }
 
-        $services = $plugins->getServiceLocator();
-        $options  = $services->get('CmsJquery\\Options\\ModuleOptions');
-
-        $plugin = [];
-
-        if (isset($options->getPlugins()[$requestedName])) {
-            $plugin = $options->getPlugins()[$requestedName];
-        }
-
-        return is_string($plugin) || !empty($plugin['files']);
+        return true;
     }
 
     /**
@@ -51,18 +48,20 @@ class JQueryPluginAbstractServiceFactory implements AbstractFactoryInterface
                 "'$requestedName' plugin");
         }
 
-        $services = $plugins->getServiceLocator();
-        $options  = $services->get('CmsJquery\\Options\\ModuleOptions');
-
-        $plugin = $options->getPlugins()[$requestedName];
-        if (is_string($plugin)) {
-            $plugin = ['files' => $plugin];
+        $options = $this->creationOptions;
+        if (empty($options['name'])) {
+            $options['name'] = $requestedName;
         }
 
-        if (empty($plugin['name'])) {
-            $plugin['name'] = $requestedName;
-        }
+        return new Plugin($options);
+    }
 
-        return new Plugin($plugin);
+    /**
+     * {@inheritDoc}
+     */
+    public function setCreationOptions(array $options)
+    {
+        $this->creationOptions = $options;
+        return $this;
     }
 }
