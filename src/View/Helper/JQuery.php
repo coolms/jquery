@@ -18,6 +18,7 @@ use Zend\View\Helper\AbstractHelper,
     Zend\View\Helper\InlineScript,
     CmsCommon\Stdlib\OptionsProviderTrait,
     CmsJquery\Options\JQueryOptionsInterface,
+    CmsJquery\Plugin\JQueryPluginableInterface,
     CmsJquery\Plugin\JQueryPluginManager,
     CmsJquery\Plugin\JQueryPluginManagerAwareTrait,
     CmsJquery\View\Helper\Plugin\AbstractPlugin;
@@ -28,7 +29,7 @@ use Zend\View\Helper\AbstractHelper,
  * @method JQuery setOptions(\CmsJquery\Options\JQueryOptionsInterface $options)
  * @method \CmsJquery\Options\JQueryOptionsInterface getOptions()
  */
-class JQuery extends AbstractHelper
+class JQuery extends AbstractHelper implements JQueryPluginableInterface
 {
     use OptionsProviderTrait,
         JQueryPluginManagerAwareTrait;
@@ -124,8 +125,12 @@ class JQuery extends AbstractHelper
      */
     protected function setupPlugins()
     {
-        $plugins = $this->getOptions()->getPlugins();
-        foreach ($plugins as $plugin => $options) {
+        foreach ($this->getPlugins() as $plugin => $options) {
+            $plugins = $this->getJQueryPluginManager();
+            if (!$plugins->has($plugin)) {
+                $plugins->setFactory($plugin, 'CmsJquery\\Plugin\\JQueryPluginFactory');
+            }
+
             if (is_array($options) && !empty($options['onload'])) {
                 $this->getPlugin($plugin, $options);
             }
@@ -144,7 +149,7 @@ class JQuery extends AbstractHelper
         $plugins = $this->getJQueryPluginManager();
         if ($plugins->has($name)) {
             if (!$options) {
-                $defaults = $this->getOptions()->getPlugins();
+                $defaults = $this->getPlugins();
                 if (!empty($defaults[$name])) {
                     $options = $defaults[$name];
                 }
@@ -177,6 +182,14 @@ class JQuery extends AbstractHelper
         if ($plugin = $this->getPlugin($method)) {
             return call_user_func_array($plugin, $args);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPlugins()
+    {
+        return $this->getOptions()->getPlugins();
     }
 
     /**

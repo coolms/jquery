@@ -56,10 +56,6 @@ return [
         ],
     ],
     'jquery_plugins' => [
-        'abstract_factories' => [
-            'CmsJquery\Plugin\JQueryPluginAbstractServiceFactory'
-                => 'CmsJquery\Plugin\JQueryPluginAbstractServiceFactory',
-        ],
         'aliases' => [
             'ui' => 'CmsJquery\View\Helper\Plugin\Ui',
         ],

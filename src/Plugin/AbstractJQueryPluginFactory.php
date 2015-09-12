@@ -10,23 +10,56 @@
 
 namespace CmsJquery\Plugin;
 
-use Zend\ServiceManager\FactoryInterface,
+use Zend\ServiceManager\AbstractPluginManager,
+    Zend\ServiceManager\FactoryInterface,
     Zend\ServiceManager\MutableCreationOptionsInterface,
     Zend\ServiceManager\ServiceLocatorInterface,
     Zend\Stdlib\AbstractOptions,
-    CmsCommon\Stdlib\ArrayUtils;
+    CmsCommon\Stdlib\ArrayUtils,
+    CmsJquery\View\Helper\Plugin\AbstractPlugin;
 
 abstract class AbstractJQueryPluginFactory implements FactoryInterface, MutableCreationOptionsInterface
 {
+    /**
+     * @var string
+     */
+    protected $pluginClass = 'CmsJquery\\View\\Helper\\Plugin';
+
+    /**
+     * @var string
+     */
+    protected $optionsClass;
+
     /**
      * @var array
      */
     protected $creationOptions = [];
 
     /**
-     * @var string
+     * {@inheritDoc}
+     *
+     * @return AbstractPlugin
      */
-    protected $optionsClass;
+    public function createService(ServiceLocatorInterface $plugins)
+    {
+        if (!$plugins instanceof AbstractPluginManager) {
+            throw new \BadMethodCallException('jQuery plugin factory is meant to be used ' .
+                'only with a plugin manager');
+        }
+
+        $services = $plugins->getServiceLocator();
+        $pluginClass = $this->pluginClass;
+        $plugin = new $pluginClass($this->getCreationOptions($services));
+        if ($plugin instanceof JQueryPluginableInterface) {
+            foreach ($plugin->getPlugins() as $name => $options) {
+                if (!$plugins->has($name)) {
+                    $plugins->setFactory($name, 'CmsJquery\\Plugin\\JQueryPluginFactory');
+                }
+            }
+        }
+ 
+        return $plugin;
+    }
 
     /**
      * @param ServiceLocatorInterface $services

@@ -8,19 +8,12 @@
  * @author    Dmitry Popov <d.popov@altgraphic.com>
  */
 
-namespace CmsJquery\Factory\View\Helper;
+namespace CmsJquery\Plugin;
 
-use CmsJquery\Plugin\AbstractJQueryPluginFactory;
-
-class UiPluginHelperFactory extends AbstractJQueryPluginFactory
+interface JQueryPluginableInterface
 {
     /**
-     * @var string
+     * @return array
      */
-    protected $pluginClass = 'CmsJquery\View\Helper\Plugin\Ui';
-
-    /**
-     * @var string
-     */
-    protected $optionsClass = 'CmsJquery\\Options\\ModuleOptions';
+    public function getPlugins();
 }
