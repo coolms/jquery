@@ -10,18 +10,16 @@
 
 namespace CmsJquery\View\Helper\Plugin;
 
-use Zend\Filter\FilterChain,
-    Zend\Filter\FilterInterface,
-    Zend\Json\Json,
+use Zend\Json\Json,
     Zend\Stdlib\AbstractOptions,
     Zend\Stdlib\InitializableInterface,
-    Zend\View\Helper\AbstractHelper,
     Zend\View\Helper\HeadScript,
     Zend\View\Helper\InlineScript,
     Zend\View\Helper\Placeholder\Container,
     JSMin\JSMin,
     CmsCommon\Stdlib\ArrayUtils,
     CmsJquery\Stdlib\AbstractObject,
+    CmsJquery\View\Helper\AbstractHelper,
     CmsJquery\View\Helper\JQuery;
 
 /**
@@ -122,11 +120,6 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
      * @var string
      */
     protected $namespace;
-
-    /**
-     * @var FilterInterface
-     */
-    private $methodNameFilter;
 
     /**
      * __construct
@@ -599,32 +592,5 @@ EOJ;
     public function minifyScript($script)
     {
         return JsMin::minify($script);
-    }
-
-    /**
-     * @param string $name
-     * @return string
-     */
-    private function normalizeMethodName($name)
-    {
-        return lcfirst($this->getMethodNameFilter()->filter($name));
-    }
-
-    /**
-     * @return FilterInterface
-     */
-    private function getMethodNameFilter()
-    {
-        if (null === $this->methodNameFilter) {
-            $this->methodNameFilter = new FilterChain([
-                'filters' => [
-                    ['name' => 'WordUnderscoreToCamelCase'],
-                    ['name' => 'WordDashToCamelCase'],
-                    ['name' => 'WordSeparatorToCamelCase'],
-                ],
-            ]);
-        }
-
-        return $this->methodNameFilter;
     }
 }

@@ -10,8 +10,7 @@
 
 namespace CmsJquery\View\Helper;
 
-use Zend\View\Helper\AbstractHelper,
-    Zend\View\Helper\HeadLink,
+use Zend\View\Helper\HeadLink,
     Zend\View\Helper\HeadMeta,
     Zend\View\Helper\HeadStyle,
     Zend\View\Helper\HeadScript,
@@ -19,6 +18,7 @@ use Zend\View\Helper\AbstractHelper,
     CmsCommon\Stdlib\OptionsProviderTrait,
     CmsJquery\Options\JQueryOptionsInterface,
     CmsJquery\Plugin\JQueryPluginableInterface,
+    CmsJquery\Plugin\JQueryPluginableTrait,
     CmsJquery\Plugin\JQueryPluginManager,
     CmsJquery\Plugin\JQueryPluginManagerAwareTrait,
     CmsJquery\View\Helper\Plugin\AbstractPlugin;
@@ -32,6 +32,7 @@ use Zend\View\Helper\AbstractHelper,
 class JQuery extends AbstractHelper implements JQueryPluginableInterface
 {
     use OptionsProviderTrait,
+        JQueryPluginableTrait,
         JQueryPluginManagerAwareTrait;
 
     /**
@@ -132,31 +133,11 @@ class JQuery extends AbstractHelper implements JQueryPluginableInterface
             }
 
             if (is_array($options) && !empty($options['onload'])) {
-                $this->getPlugin($plugin, $options);
+                $this->getPlugin($plugin);
             }
         }
 
         return $this;
-    }
-
-    /**
-     * @param string $name
-     * @param array $options
-     * @return AbstractPlugin
-     */
-    protected function getPlugin($name, array $options = [])
-    {
-        $plugins = $this->getJQueryPluginManager();
-        if ($plugins->has($name)) {
-            if (!$options) {
-                $defaults = $this->getPlugins();
-                if (!empty($defaults[$name])) {
-                    $options = $defaults[$name];
-                }
-            }
-
-            return $plugins->get($name, $options);
-        }
     }
 
     /**
@@ -189,7 +170,11 @@ class JQuery extends AbstractHelper implements JQueryPluginableInterface
      */
     public function getPlugins()
     {
-        return $this->getOptions()->getPlugins();
+        if (!$this->plugins) {
+            $this->setPlugins($this->getOptions()->getPlugins());
+        }
+
+        return $this->plugins;
     }
 
     /**
@@ -278,7 +263,7 @@ class JQuery extends AbstractHelper implements JQueryPluginableInterface
 {$this->headScript()}
 JQUERY;
         } catch (\Exception $e) {
-            return '';
+            return $e->getMessage();
         }
     }
 }

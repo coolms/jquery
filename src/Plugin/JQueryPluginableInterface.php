@@ -10,6 +10,8 @@
 
 namespace CmsJquery\Plugin;
 
+use CmsJquery\View\Helper\Plugin\AbstractPlugin;
+
 interface JQueryPluginableInterface
 {
     /**
