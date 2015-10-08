@@ -10,12 +10,13 @@
 
 namespace CmsJquery\Factory;
 
-use Zend\Mvc\Service\AbstractPluginManagerFactory;
+use Zend\Mvc\Service\AbstractPluginManagerFactory,
+    CmsJquery\Plugin\JQueryPluginManager;
 
 /**
  * @author Dmitry Popov <d.popov@altgraphic.com>
  */
 class JQueryPluginManagerFactory extends AbstractPluginManagerFactory
 {
-    const PLUGIN_MANAGER_CLASS = 'CmsJquery\\Plugin\\JQueryPluginManager';
+    const PLUGIN_MANAGER_CLASS = JQueryPluginManager::class;
 }

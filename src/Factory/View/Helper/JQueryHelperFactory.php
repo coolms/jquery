@@ -12,6 +12,7 @@ namespace CmsJquery\Factory\View\Helper;
 
 use Zend\ServiceManager\FactoryInterface,
     Zend\ServiceManager\ServiceLocatorInterface,
+    CmsJquery\Options\ModuleOptions,
     CmsJquery\View\Helper\JQuery;
 
 class JQueryHelperFactory implements FactoryInterface
@@ -21,11 +22,11 @@ class JQueryHelperFactory implements FactoryInterface
      *
      * @return JQuery
      */
-    public function createService(ServiceLocatorInterface $helpers)
+    public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        $services = $helpers->getServiceLocator();
+        $services = $serviceLocator->getServiceLocator();
         return new JQuery(
-            $services->get('CmsJquery\\Options\\ModuleOptions'),
+            $services->get(ModuleOptions::class),
             $services->get('JQueryPluginManager')
         );
     }

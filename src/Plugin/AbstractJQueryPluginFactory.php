@@ -16,6 +16,7 @@ use Zend\ServiceManager\AbstractPluginManager,
     Zend\ServiceManager\ServiceLocatorInterface,
     Zend\Stdlib\AbstractOptions,
     CmsCommon\Stdlib\ArrayUtils,
+    CmsJquery\View\Helper\Plugin,
     CmsJquery\View\Helper\Plugin\AbstractPlugin;
 
 abstract class AbstractJQueryPluginFactory implements FactoryInterface, MutableCreationOptionsInterface
@@ -23,7 +24,7 @@ abstract class AbstractJQueryPluginFactory implements FactoryInterface, MutableC
     /**
      * @var string
      */
-    protected $pluginClass = 'CmsJquery\\View\\Helper\\Plugin';
+    protected $pluginClass = Plugin::class;
 
     /**
      * @var string
@@ -53,7 +54,7 @@ abstract class AbstractJQueryPluginFactory implements FactoryInterface, MutableC
         if ($plugin instanceof JQueryPluginableInterface) {
             foreach ($plugin->getPlugins() as $name => $options) {
                 if (!$plugins->has($name)) {
-                    $plugins->setFactory($name, 'CmsJquery\\Plugin\\JQueryPluginFactory');
+                    $plugins->setFactory($name, JQueryPluginFactory::class);
                 }
             }
         }

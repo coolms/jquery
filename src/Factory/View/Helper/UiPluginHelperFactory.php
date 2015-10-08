@@ -10,17 +10,19 @@
 
 namespace CmsJquery\Factory\View\Helper;
 
-use CmsJquery\Plugin\AbstractJQueryPluginFactory;
+use CmsJquery\Plugin\AbstractJQueryPluginFactory,
+    CmsJquery\Options\ModuleOptions,
+    CmsJquery\View\Helper\Plugin\Ui;
 
 class UiPluginHelperFactory extends AbstractJQueryPluginFactory
 {
     /**
      * @var string
      */
-    protected $pluginClass = 'CmsJquery\View\Helper\Plugin\Ui';
+    protected $pluginClass = Ui::class;
 
     /**
      * @var string
      */
-    protected $optionsClass = 'CmsJquery\\Options\\ModuleOptions';
+    protected $optionsClass = ModuleOptions::class;
 }

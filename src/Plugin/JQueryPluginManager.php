@@ -11,6 +11,7 @@
 namespace CmsJquery\Plugin;
 
 use Zend\I18n\Translator\TranslatorAwareInterface,
+    Zend\I18n\Translator\TranslatorInterface,
     Zend\ServiceManager\AbstractPluginManager,
     Zend\ServiceManager\ConfigInterface,
     Zend\Stdlib\InitializableInterface,
@@ -78,8 +79,8 @@ class JQueryPluginManager extends AbstractPluginManager
     public function getRenderer()
     {
         $locator = $this->getServiceLocator();
-        if (null === $this->renderer && $locator->has('Zend\\View\\Renderer\\RendererInterface')) {
-            $this->setRenderer($locator->get('Zend\\View\\Renderer\\RendererInterface'));
+        if (null === $this->renderer && $locator->has(Renderer\RendererInterface::class)) {
+            $this->setRenderer($locator->get(Renderer\RendererInterface::class));
         }
 
         return $this->renderer;
@@ -124,8 +125,8 @@ class JQueryPluginManager extends AbstractPluginManager
             return;
         }
 
-        if ($locator->has('Zend\\I18n\\Translator\\TranslatorInterface')) {
-            $helper->setTranslator($locator->get('Zend\\I18n\\Translator\\TranslatorInterface'));
+        if ($locator->has(TranslatorInterface::class)) {
+            $helper->setTranslator($locator->get(TranslatorInterface::class));
             return;
         }
 
@@ -176,9 +177,9 @@ class JQueryPluginManager extends AbstractPluginManager
         }
 
         throw new \InvalidArgumentException(sprintf(
-            'Can\'t create jQuery plugin for %s; ' .
-            'Plugin must be an instance of CmsJquery\View\Helper\Plugin\AbstractPlugin',
-            (is_object($plugin) ? get_class($plugin) : gettype($plugin))
+            'Can\'t create jQuery plugin for %s; Plugin must be an instance of %s',
+            (is_object($plugin) ? get_class($plugin) : gettype($plugin)),
+            AbstractPlugin::class
         ));
     }
 }

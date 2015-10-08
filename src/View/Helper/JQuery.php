@@ -19,6 +19,7 @@ use Zend\View\Helper\HeadLink,
     CmsJquery\Options\JQueryOptionsInterface,
     CmsJquery\Plugin\JQueryPluginableInterface,
     CmsJquery\Plugin\JQueryPluginableTrait,
+    CmsJquery\Plugin\JQueryPluginFactory,
     CmsJquery\Plugin\JQueryPluginManager,
     CmsJquery\Plugin\JQueryPluginManagerAwareTrait,
     CmsJquery\View\Helper\Plugin\AbstractPlugin;
@@ -129,7 +130,7 @@ class JQuery extends AbstractHelper implements JQueryPluginableInterface
         foreach ($this->getPlugins() as $plugin => $options) {
             $plugins = $this->getJQueryPluginManager();
             if (!$plugins->has($plugin)) {
-                $plugins->setFactory($plugin, 'CmsJquery\\Plugin\\JQueryPluginFactory');
+                $plugins->setFactory($plugin, JQueryPluginFactory::class);
             }
 
             if (is_array($options) && !empty($options['onload'])) {
