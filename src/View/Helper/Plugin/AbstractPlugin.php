@@ -392,6 +392,20 @@ EOJ;
     }
 
     /**
+     * @param array|string|Expr $scripts
+     * @return self
+     */
+    public function setScript($scripts)
+    {
+        $scripts = (array) $scripts;
+        foreach ($scripts as $script) {
+            $this->script()->append($script);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getScript()
