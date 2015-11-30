@@ -29,7 +29,7 @@ trait JQueryPluginableTrait
             return $plugin;
         }
 
-        if (is_callable('parent::__get')) {
+        if (is_callable([__CLASS__, 'parent::' . __FUNCTION__])) {
             return parent::__get($plugin);
         }
     }
@@ -45,7 +45,7 @@ trait JQueryPluginableTrait
             return call_user_func_array($plugin, $args);
         }
 
-        if (is_callable('parent::__call')) {
+        if (is_callable([__CLASS__, 'parent::' . __FUNCTION__])) {
             return parent::__call($method, $args);
         }
     }
