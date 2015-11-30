@@ -36,6 +36,11 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
     /**
      * @var string
      */
+    protected $pattern = '%s("%s").%s(%s);';
+
+    /**
+     * @var string
+     */
     protected $name;
 
     /**
@@ -174,10 +179,8 @@ abstract class AbstractPlugin extends AbstractHelper implements InitializableInt
 
         if (is_string($element)) {
             $options = $options ? array_merge($this->getDefaults(), $options) : $this->getDefaults();
-            $this->script()->prepend(sprintf(<<<EOJ
-%s("%s").%s(%s);
-EOJ
-                ,
+            $this->script()->prepend(sprintf(
+                $this->pattern,
                 $jQuery,
                 $element,
                 $this->getName(),
